@@ -1,0 +1,5 @@
+node_modules
+forta.config.json
+.ipynb_checkpoints
+venv
+.idea
