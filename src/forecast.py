@@ -1,5 +1,8 @@
 import json
+import logging
 import os
+import sys
+import warnings
 from datetime import date
 
 import optuna
@@ -7,6 +10,11 @@ import pandas as pd
 from fbprophet import Prophet
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
+
+warnings.filterwarnings("ignore")
+
+logging.getLogger('fbprophet').setLevel(logging.WARNING)
+logging.disable(sys.maxsize)
 
 DEFAULT_PARAMS = {
     'changepoint_prior_scale': 0.45630165790829486,
@@ -42,8 +50,9 @@ def find_params(trial):
                 weekly_seasonality=False,
                 daily_seasonality=False
                 )
-    m.fit(train_temp_df)
-    validation = m.predict(validation_temp_df)
+    with suppress_stdout_stderr():
+        m.fit(train_temp_df)
+        validation = m.predict(validation_temp_df)
     mae_for_optuna = mean_absolute_error(validation_temp_df['y'], validation['yhat'])
     return mae_for_optuna
 
@@ -63,7 +72,7 @@ def get_train_dataframe(df):
     return train_df_tun2, val_df_tun
 
 
-def get_today_forecast(pool, number_of_days):
+def get_today_forecast(pool):
     df = pd.read_csv('./pools_data/' + pool + '.csv')
     df = preprocess_dataframe(df)
     train_df, val_df_tun = get_train_dataframe(df)
@@ -78,14 +87,16 @@ def get_today_forecast(pool, number_of_days):
                     weekly_seasonality=False,
                     daily_seasonality=False
                     )
-    model.fit(train_df)
-    future_optuna_df = model.make_future_dataframe(periods=number_of_days, freq='D')
-    forecast = model.predict(future_optuna_df)
+    with suppress_stdout_stderr():
+        model.fit(train_df)
+        future_optuna_df = model.make_future_dataframe(periods=60, freq='D')
+        forecast = model.predict(future_optuna_df)
     mask = (forecast['ds'].dt.date == date.today())
-    return forecast[mask]
+    return float(forecast[mask]['trend'].values[0]), float(forecast[mask]['yearly_upper'].values[0]), float(
+        forecast[mask]['yhat'].values[0])
 
 
-def get_optimal_parameters_for_pool():
+def update_optimal_parameters_for_pool():
     with open('config.json', 'r') as f:
         config = json.load(f)
         for protocol in config['protocols']:
@@ -101,3 +112,34 @@ def get_optimal_parameters_for_pool():
                     json.dump(best_params, outfile)
                     outfile.flush()
                     os.fsync(outfile.fileno())
+
+
+class suppress_stdout_stderr(object):
+    '''
+    A context manager for doing a "deep suppression" of stdout and stderr in
+    Python, i.e. will suppress all print, even if the print originates in a
+    compiled C/Fortran sub-function.
+       This will not suppress raised exceptions, since exceptions are printed
+    to stderr just before a script exits, and after the context manager has
+    exited (at least, I think that is why it lets exceptions through).
+
+    '''
+
+    def __init__(self):
+        # Open a pair of null files
+        self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
+        # Save the actual stdout (1) and stderr (2) file descriptors.
+        self.save_fds = [os.dup(1), os.dup(2)]
+
+    def __enter__(self):
+        # Assign the null pointers to stdout and stderr.
+        os.dup2(self.null_fds[0], 1)
+        os.dup2(self.null_fds[1], 2)
+
+    def __exit__(self, *_):
+        # Re-assign the real stdout/stderr back to (1) and (2)
+        os.dup2(self.save_fds[0], 1)
+        os.dup2(self.save_fds[1], 2)
+        # Close the null files
+        for fd in self.null_fds + self.save_fds:
+            os.close(fd)
