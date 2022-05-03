@@ -55,7 +55,7 @@ def get_protocol_data(protocol, pool, timestamp, client):
 
 
 def update_pools_data():
-    with open('config.json') as f:
+    with open('config.json', 'r') as f:
         config = json.load(f)
         for protocol in config['protocols']:
             if protocol in AVAILABLE_PROTOCOLS:

@@ -1,8 +1,8 @@
-# High Gas Agent
+# Unusual Price Changes Agent
 
 ## Description
 
-This agent detects transactions with high gas used
+This agent detects transactions with unusual price changes
 
 ## Supported Chains
 
