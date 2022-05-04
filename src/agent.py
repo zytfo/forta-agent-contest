@@ -8,13 +8,17 @@ from .forecast import update_optimal_parameters_for_pool as update_optimal_param
 from .parser import get_protocol_last_day_data as get_protocol_last_day_data_function
 from .parser import update_pools_data as update_pools_data_function
 
-findings_count = 0
-config = []
-forecast_prices = {}
+findings_count = 0  # the number of findings
+config = []  # in-memory config data
+forecast_prices = {}  # map pool -> today's forecasted price
 
 
-# Initialization
 def initialize():
+    """
+    Runs when the agent starts. It runs routines and adds the job to the scheduler in order to
+    update data for forecasting.
+    :return:
+    """
     parse_config()
     update_pools_data_function()
     update_forecast_prices()
@@ -27,6 +31,9 @@ def initialize():
 
 
 def parse_config():
+    """
+    Parses config and update in-memory variable in run-time
+    """
     global config
     config = []
     with open('./config.json', 'r') as f:
@@ -40,6 +47,9 @@ def parse_config():
 
 
 def update_forecast_prices():
+    """
+    Update today's forecast price
+    """
     global forecast_prices, config
     for protocol in config:
         for key, value in protocol.items():
@@ -49,6 +59,10 @@ def update_forecast_prices():
 
 
 def create_finding(severity, price_change, pool):
+    """
+    Creates a new finding with given severity, price change and pool
+    :rtype: Finding
+    """
     return Finding({
         'name': 'Unusual Price Change',
         'description': f'Unusual Price Change: {price_change}',
@@ -65,6 +79,7 @@ def create_finding(severity, price_change, pool):
 def provide_handle_transaction(get_transaction_receipt):
     def handle_transaction(transaction_event):
         global findings_count, forecast_prices
+        # limiting this agent to emit only 5 findings so that the alert feed is not spammed
         if findings_count >= 5:
             return []
 
@@ -73,6 +88,8 @@ def provide_handle_transaction(get_transaction_receipt):
         for protocol in config:
             for key, value in protocol.items():
                 for pool in value:
+                    # if a pool in transaction addresses set, make a comparison to determine if there is an unusual
+                    # price change
                     if pool in transaction_event.addresses:
                         last_price = get_protocol_last_day_data_function(key, pool)
                         print(forecast_prices[pool]['trend'])
@@ -93,5 +110,6 @@ def provide_handle_transaction(get_transaction_receipt):
 real_handle_transaction = provide_handle_transaction(get_transaction_receipt)
 
 
+#  Forta SDK listener
 def handle_transaction(transaction_event):
     return real_handle_transaction(transaction_event)

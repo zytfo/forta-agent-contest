@@ -70,7 +70,7 @@ parameters = {
     }
 ```
 Best parameters are forced to recalculate every `28 days` (configurable) after the start of the agent and store the best options inside the `optimal_params` folder for every pool.
-So, for instance, pool `0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801` has the following best options after `100` trials (based on minimization of **MAE** and **MSE**):
+So, for instance, pool `0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801` has the following best options after `100` trials (based on minimization of **MAE**):
 ```
 {
     "changepoint_prior_scale": 0.45630165790829486, 
