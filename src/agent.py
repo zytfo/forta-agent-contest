@@ -52,7 +52,7 @@ def create_finding(severity, price_change, pool):
     return Finding({
         'name': 'Unusual Price Change',
         'description': f'Unusual Price Change: {price_change}',
-        'alert_id': 'FORTA-15',
+        'alert_id': 'FORTA-777',
         'type': FindingType.Suspicious,
         'severity': severity,
         'metadata': {
