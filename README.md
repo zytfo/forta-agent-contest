@@ -81,7 +81,8 @@ So, for instance, pool `0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801` has the foll
     "holidays_prior_scale": 6.520734116879363
 }
 ```
-When the best parameters are found, the **fit**/**predict** routine starts. It evaluates the corresponding pool data and makes a forecast for the next `60 days`. For instance, a trend forecast for the `0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801` pool: 
+When the best parameters are found, the **fit**/**predict** routine starts. It evaluates the corresponding pool data and makes a forecast for the next `60 days`. For instance, a trend forecast for the `0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801` pool:
+
 ![Chart](https://github.com/zytfo/forta-unusual-price-change-agent/blob/main/blob/chart.png?raw=true)
 
 Using this data it is possible to identify if the current price is in the trend or not and say if it is an **anomaly**. The current day forecasted price is stored in memory, so only need to compare a new price from the protocol.
