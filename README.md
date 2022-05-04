@@ -17,10 +17,14 @@ Check out data science flow in [Jupyter Notebook](https://github.com/zytfo/forta
 ## Alerts
 
 - FORTA-99
-  - Fired when a price change is higher than current trend + predicted value
+  - Fired when a price change is more than the absolute difference between an actual price and forecasted price (trend) + possible upper bound
   - Type is always set to "suspicious"
-  - Metadata "price_change" field contains the price change
-  - Metadata "pool" field contains pool address
+  - Metadata "price_change" field contains the price difference between forecasted and actual prices
+  - Metadata "pool" field contains the pool address
+  - Metadata "last_actual_price" contains the last actual price fetched from the protocol
+  - Metadata "forecasted_upper" contains forecasted upper threshold
+  - Metadata "forecasted_upper_bound" contains forecasted_price + forecasted_upper
+  - Metadata "forecasted_lower_bound" contains forecasted_price - forecasted_upper
 
 ## Test Data
 
