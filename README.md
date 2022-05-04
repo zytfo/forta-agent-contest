@@ -16,7 +16,7 @@ Check out data science flow in [Jupyter Notebook](https://github.com/zytfo/forta
 
 ## Alerts
 
-- FORTA-777
+- FORTA-99
   - Fired when a price change is higher than current trend + predicted value
   - Type is always set to "suspicious"
   - Metadata "price_change" field contains the price change
@@ -24,7 +24,10 @@ Check out data science flow in [Jupyter Notebook](https://github.com/zytfo/forta
 
 ## Test Data
 
-
+## Running Locally
+1. Run `npm install` to install the required packages
+2. Run `npm test` to run the unit tests
+3. Run `npm start` to start the agent locally
 ---
 ## Implementation
 This section contains the implementation details of the Forta agent.
@@ -102,4 +105,33 @@ When the Forta agent starts, it makes some initialization:
 
 After that, it starts listening for a `transaction_event` and checks if there is a match of addresses in the available pools and transactions. If matches, it gets the current day forecasted price, makes a request to get the current price using the protocol's subgraph and analyses if this new price is in the forecasted trend or not. 
 
-Then it creates a new `Finding` and fires it in case of `Critical` (if the price change is more than the forecasted `yearly_upper` threshold) or `High` (if the price change is more than half of the forecasted `yearly_upper` threshold) severities.
+Then it creates a new `Finding` and fires it in case of `Critical` (if the price change is more than the forecasted `forecasted_upper` threshold) or `High` (if the price change is more than half of the forecasted `forecasted_upper` threshold) severities.
+
+```
+Finding = {
+  name: Unusual Price Change,
+  description: Unusual Price Change: {price_change} for Pool: {pool},
+  alert_id: FORTA-99,
+  type: FindingType.Suspicious,
+  severity: severity,
+  metadata: {
+    price change: the difference between forecasted price and actual price,
+    pool: pool address,
+    last_actual_price: last actual price gotten from protocol,
+    forecasted_upper: forecasted upper threshold,
+    forecasted_upper_bound: forecasted_price + forecasted_upper,
+    forecasted_lower_bound: forecasted_price - forecasted_upper
+  }
+}
+```
+
+### Example
+```
+APE/WETH pool:
+forecasted price on 04/05/2022: 186.3898830915793178870644949177326
+forecasted upper bound on 04/05/2022: 187.1234323123543238659343434654321
+forecasted upper on 04/05/2022: 0.733549221
+actual price: 184
+difference b/w forecasted price and actual price: 
+  186.3898830915793178870644949177326 - 184 = 2.38988309 > 0.733549221 -> FIRE!!! (in this case critical)
+```

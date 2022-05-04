@@ -58,20 +58,25 @@ def update_forecast_prices():
                 forecast_prices[pool] = {"trend": trend, "yearly_upper": yearly_upper, "yhat": yhat}
 
 
-def create_finding(severity, price_change, pool):
+def create_finding(severity, pool, last_price, forecasted_price, price_change, forecasted_upper):
     """
-    Creates a new finding with given severity, price change and pool
+    Creates a new finding with given severity, pool, last price, forecasted price, forecasted upper bound and price change
     :rtype: Finding
     """
     return Finding({
         'name': 'Unusual Price Change',
-        'description': f'Unusual Price Change: {price_change}',
-        'alert_id': 'FORTA-777',
+        'description': f'Unusual Price Change: {price_change} for Pool: {pool} ',
+        'alert_id': 'FORTA-99',
         'type': FindingType.Suspicious,
         'severity': severity,
         'metadata': {
             'price_change': price_change,
-            'pool': pool
+            'pool': pool,
+            'last_actual_price': last_price,
+            'forecasted_price': forecasted_price,
+            'forecasted_upper': forecasted_upper,
+            'forecasted_upper_bound': forecasted_price + forecasted_upper,
+            'forecasted_lower_bound': forecasted_price - forecasted_upper
         }
     })
 
@@ -92,14 +97,17 @@ def provide_handle_transaction(get_transaction_receipt):
                     # price change
                     if pool in transaction_event.addresses:
                         last_price = get_protocol_last_day_data_function(key, pool)
-                        print(forecast_prices[pool]['trend'])
                         difference = forecast_prices[pool]['trend'] - float(last_price)
                         if abs(difference) >= forecast_prices[pool]['yearly_upper']:
-                            finding = create_finding(FindingSeverity.Critical, abs(difference), pool)
+                            finding = create_finding(FindingSeverity.Critical, pool, last_price,
+                                                     forecast_prices[pool]['trend'], abs(difference),
+                                                     forecast_prices[pool]['yearly_upper'])
                             findings.append(finding)
                             findings_count += len(findings)
                         elif abs(difference) >= forecast_prices[pool]['yearly_upper'] / 2:
-                            finding = create_finding(FindingSeverity.High, abs(difference), pool)
+                            finding = create_finding(FindingSeverity.High, pool, last_price,
+                                                     forecast_prices[pool]['trend'], abs(difference),
+                                                     forecast_prices[pool]['yearly_upper'])
                             findings.append(finding)
                             findings_count += len(findings)
         return findings
