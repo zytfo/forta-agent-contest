@@ -4,6 +4,8 @@
 
 This agent detects transactions with unusual price changes from different protocols and pools using [Facebook Prophet](https://facebook.github.io/prophet/) time-series anomaly detection and Optuna for finding the best parameters based on various options such as seasonality, holidays, etc.
 
+Check out data science flow in [Jupyter Notebook](https://github.com/zytfo/forta-unusual-price-change-agent/blob/main/anomaly-detection.ipynb). 
+
 ## Supported Chains
 
 - Ethereum
