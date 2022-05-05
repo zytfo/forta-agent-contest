@@ -27,7 +27,8 @@ Check out data science flow in [Jupyter Notebook](https://github.com/zytfo/forta
   - Metadata "forecasted_lower_bound" contains forecasted_price - forecasted_upper
 
 ## Test Data
-Tests are not provided due to the high complexity of its implementation in a little period of time of the contest.
+Test data provided for a UNI/WETH pool: `0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801`.
+One of the tests may fail due to the non-deterministic nature of the project. 
 
 ## Running Locally
 1. Run `npm install` to install the required packages
