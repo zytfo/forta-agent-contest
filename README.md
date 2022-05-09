@@ -34,6 +34,10 @@ One of the tests may fail due to the non-deterministic nature of the project.
 1. Run `npm install` to install the required packages
 2. Run `npm test` to run the unit tests
 3. Run `npm start` to start the agent locally
+
+## Attention!
+When adding a new pool it is required to run `update_optimal_parameters_for_pool` method manually or wait for 28 days when new optimal parameters will be found. It was done for simplicity and to avoid time-consuming training during the start of the agent. By default, it uses default optimal parameters for training data. You can add optimal parameters either used the method or add them to the `optimal_params` folder with `pool_address.json` name. 
+
 ---
 ## Implementation
 This section contains the implementation details of the Forta agent.
